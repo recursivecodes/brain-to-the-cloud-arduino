@@ -9,5 +9,6 @@ const char* mqtt_url = "";
 const char* mqtt_username = "";
 const char* mqtt_password = "";
 
+const char* mqtt_client_id = "bttc_arduino";
 const char* brain_topic = "bttc/brain";
 const char* demo_topic = "bttc/demo";

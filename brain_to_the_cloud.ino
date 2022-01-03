@@ -25,7 +25,7 @@ EspMQTTClient mqttClient(
   mqtt_url,
   mqtt_username,
   mqtt_password,
-  "bttc_arduino"
+  mqtt_client_id
 );
 
 void onConnectionEstablished() {
@@ -77,7 +77,13 @@ void setup() {
   TelnetStream.print("SSID: ");
 
   pinMode(LED_BUILTIN, OUTPUT);
-  
+  if( WiFi.status() == WL_CONNECTED ) {
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+  else {
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
+
   if(switchState == HIGH) {
     Serial.println(ssid);
     TelnetStream.println(ssid);
@@ -99,13 +105,6 @@ void setup() {
 void loop(){
   mqttClient.loop();
   
-  if( WiFi.status() == WL_CONNECTED ) {
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-  else {
-    digitalWrite(LED_BUILTIN, HIGH);
-  }
-
   if( brain.update() ) {
     Serial.println(brain.readCSV());
     TelnetStream.println(brain.readCSV());
