@@ -75,6 +75,8 @@ void setup() {
   TelnetStream.println("");
   TelnetStream.println("WiFi connected.");
   TelnetStream.print("SSID: ");
+
+  pinMode(LED_BUILTIN, OUTPUT);
   
   if(switchState == HIGH) {
     Serial.println(ssid);
@@ -96,6 +98,13 @@ void setup() {
 
 void loop(){
   mqttClient.loop();
+  
+  if( WiFi.status() == WL_CONNECTED ) {
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+  else {
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
 
   if( brain.update() ) {
     Serial.println(brain.readCSV());
