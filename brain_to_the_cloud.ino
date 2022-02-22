@@ -1,5 +1,3 @@
-
-// Load Wi-Fi library
 #include <ESP8266WiFi.h>
 #include "creds.h"
 #include <Brain.h>
@@ -13,7 +11,7 @@ unsigned long lastBrainUpload = millis();
 unsigned long lastDemoUpload = millis();
 
 const long brainTimeout = 5000;
-const long demoTimeout = 1000;
+const long demoTimeout = 500;
 
 boolean mqttInit = false;
 
@@ -79,6 +77,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   if( WiFi.status() == WL_CONNECTED ) {
     digitalWrite(LED_BUILTIN, LOW);
+    blinkLed(3);
   }
   else {
     digitalWrite(LED_BUILTIN, HIGH);
@@ -106,14 +105,16 @@ void loop(){
   mqttClient.loop();
   
   if( brain.update() ) {
+    blinkLed(1);
     Serial.println(brain.readCSV());
     TelnetStream.println(brain.readCSV());
+    delay(500);
     unsigned long now = millis();
 
-    StaticJsonDocument<150> doc;
-    char readingsJson[256];
+    StaticJsonDocument<250> doc;
+    char readingsJson[500];
     uint8_t signalQuality = brain.readSignalQuality();
-    doc["signalStrength"] = signalQuality;
+    doc["signalStrength"] = map(signalQuality, 200, 1, 1, 100);
     doc["attention"] = brain.readAttention();
     doc["meditation"] = brain.readMeditation();
     doc["delta"] = brain.readDelta();
@@ -122,14 +123,10 @@ void loop(){
     doc["highAlpha"] = brain.readHighAlpha();
     doc["lowBeta"] = brain.readLowBeta();
     doc["highBeta"] = brain.readHighBeta();
+    doc["lowGamma"] = brain.readLowGamma();
+    doc["highGamma"] = brain.readMidGamma();
+    doc["isDistracted"] = false;
 
-    if(signalQuality == 200) {
-      digitalWrite(LED_PIN, HIGH);
-    }
-    else {
-      digitalWrite(LED_PIN, LOW);
-    }
-    
     serializeJson(doc, readingsJson);
     
     if(now - lastBrainUpload > brainTimeout) {
@@ -148,8 +145,8 @@ void loop(){
     
   }
   else {
-    Serial.println("no data");
-    TelnetStream.println("no data");
+    //Serial.print(".");
+    //TelnetStream.print(".");
   }
   
   if(mqttInit) {  
@@ -159,7 +156,13 @@ void loop(){
     serializeJson(doc, readingsJson);
     mqttClient.publish("bttc/test", readingsJson);  
   }
-  
-  delay(1000);
-  
+}
+
+void blinkLed(int times) {
+  for(int i=0; i<times; i++) {
+    digitalWrite(LED_PIN, HIGH);
+    delay(500);
+    digitalWrite(LED_PIN, LOW);
+    delay(500);
+  }
 }
