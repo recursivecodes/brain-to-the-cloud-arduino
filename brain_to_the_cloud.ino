@@ -27,11 +27,6 @@ EspMQTTClient mqttClient(
 );
 
 void onConnectionEstablished() {
-  /*
-  client.subscribe("mytopic/test", [] (const String &payload)  {
-    Serial.println(payload);
-  });
-  */
   mqttInit = true;
 }
 
@@ -143,18 +138,6 @@ void loop(){
       lastDemoUpload = now;
     }
     
-  }
-  else {
-    //Serial.print(".");
-    //TelnetStream.print(".");
-  }
-  
-  if(mqttInit) {  
-    StaticJsonDocument<150> doc;
-    char readingsJson[256];
-    doc["test"] = String(millis());
-    serializeJson(doc, readingsJson);
-    mqttClient.publish("bttc/test", readingsJson);  
   }
 }
 
